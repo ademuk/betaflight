@@ -1340,6 +1340,15 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
         sbufWriteU8(dst, 0);
 #endif
         break;
+
+    case MSP_RXRANGE_CONFIG:
+        for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
+            sbufWriteU16(dst, rxChannelRangeConfigs(i)->min);
+            sbufWriteU16(dst, rxChannelRangeConfigs(i)->max);
+        }
+
+        break;
+
     case MSP_FAILSAFE_CONFIG:
         sbufWriteU8(dst, failsafeConfig()->failsafe_delay);
         sbufWriteU8(dst, failsafeConfig()->failsafe_off_delay);
@@ -2811,7 +2820,6 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
         rxConfigMutable()->maxcheck = sbufReadU16(src);
         rxConfigMutable()->midrc = sbufReadU16(src);
         rxConfigMutable()->mincheck = sbufReadU16(src);
-        rxConfigMutable()->spektrum_sat_bind = sbufReadU8(src);
         if (sbufBytesRemaining(src) >= 4) {
             rxConfigMutable()->rx_min_usec = sbufReadU16(src);
             rxConfigMutable()->rx_max_usec = sbufReadU16(src);
@@ -2869,8 +2877,15 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
             sbufReadU8(src);
 #endif
         }
-
         break;
+
+    case MSP_SET_RXRANGE_CONFIG:
+        for (int i = 0; i < NON_AUX_CHANNEL_COUNT; i++) {
+            rxChannelRangeConfigsMutable(0)[i].min = sbufReadU16(src);
+            rxChannelRangeConfigsMutable(0)[i].max = sbufReadU16(src);
+        }
+        break;
+
     case MSP_SET_FAILSAFE_CONFIG:
         failsafeConfigMutable()->failsafe_delay = sbufReadU8(src);
         failsafeConfigMutable()->failsafe_off_delay = sbufReadU8(src);
