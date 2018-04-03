@@ -3934,18 +3934,20 @@ void cliProcess(void)
                     cliBuffer[bufferIndex] = pstart->name[bufferIndex];
                 }
             }
+            for (; i < bufferIndex; i++)
+                cliWrite(cliBuffer[i]);
+
             if (!bufferIndex || pstart != pend) {
                 /* Print list of ambiguous matches */
-                cliPrint("\r\033[K");
+                cliPrompt();
                 for (cmd = pstart; cmd <= pend; cmd++) {
                     cliPrint(cmd->name);
                     cliWrite('\t');
                 }
                 cliPrompt();
-                i = 0;    /* Redraw prompt */
             }
-            for (; i < bufferIndex; i++)
-                cliWrite(cliBuffer[i]);
+
+            bufferIndex = 0;
         } else if (!bufferIndex && c == 4) {   // CTRL-D
             cliExit(cliBuffer);
             return;
